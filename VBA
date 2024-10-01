@@ -1,0 +1,515 @@
+Sub In_Transit_ITD_Setup_MX_Included()
+'
+'Intransit Past Due Macro
+'The beginning of this Macro is formatting the download of past due in transits from the NAIntransit Dashboard
+'ITD Stand for Intransit Dashboard to indicate this was pulled from the NAIn-Transit Dashboard
+    Columns("A:A").Select
+    Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+    
+    Range("A1").Value = "Unique Identifier"
+    
+    Range("A2").Value = "=CONCATENATE(C2,""-"",H2,""-"",I2,""-"",J2)"
+    
+    Range("A2").Select
+        Selection.AutoFill Destination:=Range("A2:A" & Range("E" & Rows.Count).End(xlUp).Row)
+        Range(Selection, Selection.End(xlDown)).Select
+    
+    Columns("A:A").Select
+        Selection.Copy
+        Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+        
+    Columns("K:M").Select
+        Selection.NumberFormat = "m/d/yyyy"
+    
+    Range("P1").Value = "Qty"
+    
+    Dim DateVar As Date
+        DateVar = Format(DateAdd("d", -7, Date), MM - DD - YYYY)
+        Debug.Print DateVar
+    Range("Q1").Value = DateVar
+        Selection.NumberFormat = "mm-dd-yyyy"
+    Range("R1").Value = "Previous Notes"
+    Range("S1").Value = "In WMS?"
+    Range("T1").Value = "Today's Notes"
+    
+    ActiveSheet.UsedRange.EntireColumn.AutoFit
+    
+    ActiveSheet.Name = Format(Date, "MM-DD-YY") & " " & "ITD"
+    
+    Range("H1:J1").Interior.ColorIndex = 34
+    
+    Rows("1:1").Select
+        Selection.Font.Bold = True
+    
+    Range("B2").Select
+        ActiveWindow.FreezePanes = True
+        
+Dim range_1 As Range
+Dim cond_1, cond_2, cond_3 As FormatCondition
+Set range_1 = Range("B2", Range("B2").End(xlDown))
+Set cond_1 = range_1.FormatConditions.Add(xlCellValue, xlGreater, "9")
+
+With cond_1
+.Interior.Color = vbRed
+.Font.Color = vbWhite
+End With
+
+Worksheets(1).Activate
+
+
+'This is where we create the WOSOPO request to send to John Li
+    Sheets.Add After:=ActiveSheet
+        ActiveSheet.Name = Format(Date, "MM-DD-YY") & " WOSOPO Req"
+    
+    Worksheets(1).Activate
+    Columns("J").Select
+    Selection.Copy
+    Worksheets(2).Activate
+    Range("A1").Select
+    ActiveSheet.Paste
+    
+    Worksheets(1).Activate
+    Columns("I").Select
+    Selection.Copy
+    Worksheets(2).Activate
+    Range("B1").Select
+    ActiveSheet.Paste
+    
+    Worksheets(1).Activate
+    Columns("H").Select
+    Selection.Copy
+    Worksheets(2).Activate
+    Range("C1").Select
+    ActiveSheet.Paste
+    
+'This will save to a designated folder in the Sharepoint/Teams shared forlder
+    Dim Filename As String
+    Dim Sharepoint As String
+    
+    Filename = Format(Now(), "MM-DD-YYYY") & " NAInTransit Review-From Mexico Included.xlsx"
+    Sharepoint = "https://gates4.sharepoint.com/sites/SOPManagement/Shared%20Documents/General/Systems%20and%20Analytics%20Team/Requisitions/"
+    
+    ActiveWorkbook.SaveAs Filename:=Sharepoint & Filename, FileFormat _
+        :=xlOpenXMLWorkbook, CreateBackup:=False
+
+'This will create separate sheets for each org
+Sheets(1).Copy After:=Sheets(2)
+Sheets(1).Copy After:=Sheets(3)
+Sheets(1).Copy After:=Sheets(4)
+Sheets(1).Copy After:=Sheets(5)
+Sheets(1).Copy After:=Sheets(6)
+Sheets(1).Copy After:=Sheets(7)
+Sheets(1).Copy After:=Sheets(8)
+Sheets(1).Copy After:=Sheets(9)
+Sheets(1).Copy After:=Sheets(10)
+Sheets(1).Copy After:=Sheets(11)
+Sheets(1).Copy After:=Sheets(12)
+Sheets(1).Copy After:=Sheets(13)
+Sheets(1).Copy After:=Sheets(14)
+Sheets(1).Copy After:=Sheets(15)
+Sheets(1).Copy After:=Sheets(16)
+Sheets(1).Copy After:=Sheets(17)
+
+Sheets(3).Name = "AT " & Format(Date, "MM-DD-YY")
+Sheets(4).Name = "CC " & Format(Date, "MM-DD-YY")
+Sheets(5).Name = "CR " & Format(Date, "MM-DD-YY")
+Sheets(6).Name = "CY " & Format(Date, "MM-DD-YY")
+Sheets(7).Name = "ET " & Format(Date, "MM-DD-YY")
+Sheets(8).Name = "FL " & Format(Date, "MM-DD-YY")
+Sheets(9).Name = "GL " & Format(Date, "MM-DD-YY")
+Sheets(10).Name = "IM " & Format(Date, "MM-DD-YY")
+Sheets(11).Name = "IO " & Format(Date, "MM-DD-YY")
+Sheets(12).Name = "JT " & Format(Date, "MM-DD-YY")
+Sheets(13).Name = "NC " & Format(Date, "MM-DD-YY")
+Sheets(14).Name = "PF " & Format(Date, "MM-DD-YY")
+Sheets(15).Name = "PO " & Format(Date, "MM-DD-YY")
+Sheets(16).Name = "RE " & Format(Date, "MM-DD-YY")
+Sheets(17).Name = "SS " & Format(Date, "MM-DD-YY")
+Sheets(18).Name = "VS " & Format(Date, "MM-DD-YY")
+
+Worksheets(3).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "CC Corpus Christi, TX Manufacturing", "CR Crossville, TN Colinx", _
+        "CY Poplar Bluff, MO Refurbishing", "ET E-Town, KY Belt Manufacturing", _
+        "FL Florence, KY Distribution Center", "GL Galesburg, IL Manufacturing", _
+        "IM Iola, KS Manufacturing", "IO Iola, KS Distribution Center", "JT JAS Taiwan", _
+        "NC Chambersburg, PA Manufacturing", "PF Poplar Bluff, MO Binstock/Relabel", _
+        "PO Poplar Bluff, MO Manufacturing", "RE Red Bay, AL Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing", "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh As Worksheet, rng As Range, LstRw As Long
+
+    Set sh = Worksheets(3)
+    With sh
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(4).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CR Crossville, TN Colinx", _
+        "CY Poplar Bluff, MO Refurbishing", "ET E-Town, KY Belt Manufacturing", _
+        "FL Florence, KY Distribution Center", "GL Galesburg, IL Manufacturing", _
+        "IM Iola, KS Manufacturing", "IO Iola, KS Distribution Center", "JT JAS Taiwan", _
+        "NC Chambersburg, PA Manufacturing", "PF Poplar Bluff, MO Binstock/Relabel", _
+        "PO Poplar Bluff, MO Manufacturing", "RE Red Bay, AL Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing", "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh1 As Worksheet, rng1 As Range
+
+    Set sh1 = Worksheets(4)
+    With sh1
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng1 = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng1.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(5).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CC Corpus Christi, TX Manufacturing", _
+        "CY Poplar Bluff, MO Refurbishing", "ET E-Town, KY Belt Manufacturing", _
+        "FL Florence, KY Distribution Center", "GL Galesburg, IL Manufacturing", _
+        "IM Iola, KS Manufacturing", "IO Iola, KS Distribution Center", "JT JAS Taiwan", _
+        "NC Chambersburg, PA Manufacturing", "PF Poplar Bluff, MO Binstock/Relabel", _
+        "PO Poplar Bluff, MO Manufacturing", "RE Red Bay, AL Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing", "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh2 As Worksheet
+
+    Set sh2 = Worksheets(5)
+    With sh2
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(6).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CC Corpus Christi, TX Manufacturing", "CR Crossville, TN Colinx", _
+        "ET E-Town, KY Belt Manufacturing", _
+        "FL Florence, KY Distribution Center", "GL Galesburg, IL Manufacturing", _
+        "IM Iola, KS Manufacturing", "IO Iola, KS Distribution Center", "JT JAS Taiwan", _
+        "NC Chambersburg, PA Manufacturing", "PF Poplar Bluff, MO Binstock/Relabel", _
+        "PO Poplar Bluff, MO Manufacturing", "RE Red Bay, AL Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing", "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh3 As Worksheet
+
+    Set sh3 = Worksheets(6)
+    With sh3
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(7).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CC Corpus Christi, TX Manufacturing", "CR Crossville, TN Colinx", _
+        "CY Poplar Bluff, MO Refurbishing", _
+        "FL Florence, KY Distribution Center", "GL Galesburg, IL Manufacturing", _
+        "IM Iola, KS Manufacturing", "IO Iola, KS Distribution Center", "JT JAS Taiwan", _
+        "NC Chambersburg, PA Manufacturing", "PF Poplar Bluff, MO Binstock/Relabel", _
+        "PO Poplar Bluff, MO Manufacturing", "RE Red Bay, AL Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing", "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh4 As Worksheet
+
+    Set sh4 = Worksheets(7)
+    With sh4
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(8).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CC Corpus Christi, TX Manufacturing", "CR Crossville, TN Colinx", _
+        "CY Poplar Bluff, MO Refurbishing", "ET E-Town, KY Belt Manufacturing", _
+        "GL Galesburg, IL Manufacturing", _
+        "IM Iola, KS Manufacturing", "IO Iola, KS Distribution Center", "JT JAS Taiwan", _
+        "NC Chambersburg, PA Manufacturing", "PF Poplar Bluff, MO Binstock/Relabel", _
+        "PO Poplar Bluff, MO Manufacturing", "RE Red Bay, AL Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing", "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh5 As Worksheet
+
+    Set sh5 = Worksheets(8)
+    With sh5
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(9).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CC Corpus Christi, TX Manufacturing", "CR Crossville, TN Colinx", _
+        "CY Poplar Bluff, MO Refurbishing", "ET E-Town, KY Belt Manufacturing", _
+        "FL Florence, KY Distribution Center", _
+        "IM Iola, KS Manufacturing", "IO Iola, KS Distribution Center", "JT JAS Taiwan", _
+        "NC Chambersburg, PA Manufacturing", "PF Poplar Bluff, MO Binstock/Relabel", _
+        "PO Poplar Bluff, MO Manufacturing", "RE Red Bay, AL Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing", "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh6 As Worksheet
+
+    Set sh6 = Worksheets(9)
+    With sh6
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(10).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CC Corpus Christi, TX Manufacturing", "CR Crossville, TN Colinx", _
+        "CY Poplar Bluff, MO Refurbishing", "ET E-Town, KY Belt Manufacturing", _
+        "FL Florence, KY Distribution Center", "GL Galesburg, IL Manufacturing", _
+        "IO Iola, KS Distribution Center", "JT JAS Taiwan", _
+        "NC Chambersburg, PA Manufacturing", "PF Poplar Bluff, MO Binstock/Relabel", _
+        "PO Poplar Bluff, MO Manufacturing", "RE Red Bay, AL Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing", "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh7 As Worksheet
+
+    Set sh7 = Worksheets(10)
+    With sh7
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(11).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CC Corpus Christi, TX Manufacturing", "CR Crossville, TN Colinx", _
+        "CY Poplar Bluff, MO Refurbishing", "ET E-Town, KY Belt Manufacturing", _
+        "FL Florence, KY Distribution Center", "GL Galesburg, IL Manufacturing", _
+        "IM Iola, KS Manufacturing", "JT JAS Taiwan", _
+        "NC Chambersburg, PA Manufacturing", "PF Poplar Bluff, MO Binstock/Relabel", _
+        "PO Poplar Bluff, MO Manufacturing", "RE Red Bay, AL Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing", "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh8 As Worksheet
+
+    Set sh8 = Worksheets(11)
+    With sh8
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(12).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CC Corpus Christi, TX Manufacturing", "CR Crossville, TN Colinx", _
+        "CY Poplar Bluff, MO Refurbishing", "ET E-Town, KY Belt Manufacturing", _
+        "FL Florence, KY Distribution Center", "GL Galesburg, IL Manufacturing", _
+        "IM Iola, KS Manufacturing", "IO Iola, KS Distribution Center", _
+        "NC Chambersburg, PA Manufacturing", "PF Poplar Bluff, MO Binstock/Relabel", _
+        "PO Poplar Bluff, MO Manufacturing", "RE Red Bay, AL Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing", "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh9 As Worksheet
+
+    Set sh9 = Worksheets(12)
+    With sh9
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(13).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CC Corpus Christi, TX Manufacturing", "CR Crossville, TN Colinx", _
+        "CY Poplar Bluff, MO Refurbishing", "ET E-Town, KY Belt Manufacturing", _
+        "FL Florence, KY Distribution Center", "GL Galesburg, IL Manufacturing", _
+        "IM Iola, KS Manufacturing", "IO Iola, KS Distribution Center", "JT JAS Taiwan", _
+        "PF Poplar Bluff, MO Binstock/Relabel", _
+        "PO Poplar Bluff, MO Manufacturing", "RE Red Bay, AL Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing", "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh10 As Worksheet
+
+    Set sh10 = Worksheets(13)
+    With sh10
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(14).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CC Corpus Christi, TX Manufacturing", "CR Crossville, TN Colinx", _
+        "CY Poplar Bluff, MO Refurbishing", "ET E-Town, KY Belt Manufacturing", _
+        "FL Florence, KY Distribution Center", "GL Galesburg, IL Manufacturing", _
+        "IM Iola, KS Manufacturing", "IO Iola, KS Distribution Center", "JT JAS Taiwan", _
+        "NC Chambersburg, PA Manufacturing", _
+        "PO Poplar Bluff, MO Manufacturing", "RE Red Bay, AL Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing", "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh11 As Worksheet
+
+    Set sh11 = Worksheets(14)
+    With sh11
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(15).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CC Corpus Christi, TX Manufacturing", "CR Crossville, TN Colinx", _
+        "CY Poplar Bluff, MO Refurbishing", "ET E-Town, KY Belt Manufacturing", _
+        "FL Florence, KY Distribution Center", "GL Galesburg, IL Manufacturing", _
+        "IM Iola, KS Manufacturing", "IO Iola, KS Distribution Center", "JT JAS Taiwan", _
+        "NC Chambersburg, PA Manufacturing", "PF Poplar Bluff, MO Binstock/Relabel", _
+        "RE Red Bay, AL Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing", "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh12 As Worksheet
+
+    Set sh12 = Worksheets(15)
+    With sh12
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(16).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CC Corpus Christi, TX Manufacturing", "CR Crossville, TN Colinx", _
+        "CY Poplar Bluff, MO Refurbishing", "ET E-Town, KY Belt Manufacturing", _
+        "FL Florence, KY Distribution Center", "GL Galesburg, IL Manufacturing", _
+        "IM Iola, KS Manufacturing", "IO Iola, KS Distribution Center", "JT JAS Taiwan", _
+        "NC Chambersburg, PA Manufacturing", "PF Poplar Bluff, MO Binstock/Relabel", _
+        "PO Poplar Bluff, MO Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing", "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh13 As Worksheet
+
+    Set sh13 = Worksheets(16)
+    With sh13
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(17).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CC Corpus Christi, TX Manufacturing", "CR Crossville, TN Colinx", _
+        "CY Poplar Bluff, MO Refurbishing", "ET E-Town, KY Belt Manufacturing", _
+        "FL Florence, KY Distribution Center", "GL Galesburg, IL Manufacturing", _
+        "IM Iola, KS Manufacturing", "IO Iola, KS Distribution Center", "JT JAS Taiwan", _
+        "NC Chambersburg, PA Manufacturing", "PF Poplar Bluff, MO Binstock/Relabel", _
+        "PO Poplar Bluff, MO Manufacturing", "RE Red Bay, AL Manufacturing", _
+        "VS Versailles, MO Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh14 As Worksheet
+
+    Set sh14 = Worksheets(17)
+    With sh14
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+
+Worksheets(18).Activate
+With ActiveSheet
+    lastRow = .Cells(.Rows.Count, 10).End(xlUp).Row
+    .Range("A1:T" & lastRow).AutoFilter Field:=7, Criteria1:=Array( _
+        "AT Lithonia, GA Distribution Center", "CC Corpus Christi, TX Manufacturing", "CR Crossville, TN Colinx", _
+        "CY Poplar Bluff, MO Refurbishing", "ET E-Town, KY Belt Manufacturing", _
+        "FL Florence, KY Distribution Center", "GL Galesburg, IL Manufacturing", _
+        "IM Iola, KS Manufacturing", "IO Iola, KS Distribution Center", "JT JAS Taiwan", _
+        "NC Chambersburg, PA Manufacturing", "PF Poplar Bluff, MO Binstock/Relabel", _
+        "PO Poplar Bluff, MO Manufacturing", "RE Red Bay, AL Manufacturing", _
+        "SS Siloam Springs, AR Manufacturing"), _
+        Operator:=xlFilterValues
+    End With
+    
+    Dim sh15 As Worksheet
+
+    Set sh15 = Worksheets(18)
+    With sh15
+    LstRw = .Cells(.Rows.Count, "A").End(xlUp).Row
+    Set rng = .Range("A2:A" & LstRw).SpecialCells(xlCellTypeVisible)
+    rng.EntireRow.Delete
+End With
+ActiveSheet.ShowAllData
+        
+End Sub
